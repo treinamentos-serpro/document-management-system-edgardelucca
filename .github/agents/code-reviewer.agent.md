@@ -28,3 +28,4 @@ Lista priorizada de melhorias. Para cada item:
 1. Problema identificado e onde está.
 2. Por que é um problema.
 3. Mudança recomendada.
+

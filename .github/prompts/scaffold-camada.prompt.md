@@ -22,3 +22,4 @@ Requisitos:
 - Uploads gravados no filesystem local via multer com diskStorage.
 - Metadados em memória nesta fase.
 - Trate erros nos limites do sistema.
+
