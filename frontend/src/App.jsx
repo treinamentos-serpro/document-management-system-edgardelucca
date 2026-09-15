@@ -1,20 +1,61 @@
-// Seed do componente raiz do Document Management System.
-//
-// Este é apenas um ponto de partida mínimo. Durante o Passo 3 você vai usar o
-// Agent Mode do GitHub Copilot para construir os componentes:
-//   - components/UploadComponent
-//   - components/DocumentList
-//   - components/DownloadButton
-// e o serviço services/ que consome a API do backend via fetch.
+import { useEffect, useState } from 'react';
+import DocumentList from './components/DocumentList';
+import UploadComponent from './components/UploadComponent';
+import { listDocuments, uploadDocument } from './services/documentApi';
+import './App.css';
 
 export default function App() {
+  const [documents, setDocuments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  async function loadDocuments() {
+    setIsLoading(true);
+
+    try {
+      const documentsFromApi = await listDocuments();
+      setDocuments(documentsFromApi);
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleUpload(uploadData) {
+    setIsUploading(true);
+    setMessage('');
+
+    try {
+      await uploadDocument(uploadData);
+      setMessage('Documento enviado com sucesso.');
+      await loadDocuments();
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem' }}>
-      <h1>Document Management System</h1>
-      <p>
-        Seed do frontend. Construa a interface durante o Passo 3 usando o Agent
-        Mode do GitHub Copilot.
-      </p>
+    <main className="app-shell">
+      <section className="app-panel">
+        <header className="page-header">
+          <h1>Document Management System</h1>
+          <p>Envie, consulte e baixe documentos armazenados localmente.</p>
+        </header>
+
+        <UploadComponent onUpload={handleUpload} isUploading={isUploading} />
+
+        {message && <p className="status-message">{message}</p>}
+
+        <DocumentList documents={documents} isLoading={isLoading} />
+      </section>
     </main>
   );
 }
