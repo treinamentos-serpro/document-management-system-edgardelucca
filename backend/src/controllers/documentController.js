@@ -2,14 +2,9 @@ const documentService = require('../services/documentService');
 
 function uploadDocument(req, res) {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'Arquivo obrigatório.' });
-    }
-
-    const owner = req.body.owner || 'anonymous';
     const document = documentService.createDocumentFromUpload({
       file: req.file,
-      owner,
+      owner: req.body.owner,
     });
 
     return res.status(201).json(document);

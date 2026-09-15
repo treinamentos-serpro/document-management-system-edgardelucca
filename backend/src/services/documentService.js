@@ -1,39 +1,19 @@
-const crypto = require('node:crypto');
 const documentRepository = require('../repositories/documentRepository');
+const { createDocumentMetadata } = require('./documentFactory');
+const { toDocumentSummary } = require('./documentPresenter');
+const { validateUpload } = require('./documentValidator');
 
 function createDocumentFromUpload({ file, owner }) {
-  if (!file) {
-    const error = new Error('Arquivo obrigatório.');
-    error.statusCode = 400;
-    throw error;
-  }
+  validateUpload({ file });
 
-  const documentId = crypto.randomUUID();
-  const document = {
-    id: documentId,
-    originalName: file.originalname,
-    storedName: file.filename,
-    size: file.size,
-    mimeType: file.mimetype || 'application/octet-stream',
-    uploadedAt: new Date().toISOString(),
-    owner: owner || 'anonymous',
-    storagePath: file.path,
-  };
+  const document = createDocumentMetadata({ file, owner });
 
   documentRepository.createDocument(document);
   return document;
 }
 
 function listDocuments() {
-  return documentRepository.listDocuments().map((document) => ({
-    id: document.id,
-    originalName: document.originalName,
-    size: document.size,
-    uploadedAt: document.uploadedAt,
-    owner: document.owner,
-    mimeType: document.mimeType,
-    storedName: document.storedName,
-  }));
+  return documentRepository.listDocuments().map(toDocumentSummary);
 }
 
 function getDocumentById(id) {
