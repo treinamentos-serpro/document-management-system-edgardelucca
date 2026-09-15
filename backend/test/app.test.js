@@ -61,3 +61,33 @@ test('deve fazer upload, listar e baixar um documento', async () => {
     await stopServer(server);
   }
 });
+
+test('deve rejeitar upload sem arquivo', async () => {
+  const { server, port } = await startServer();
+
+  try {
+    const formData = new FormData();
+    const response = await fetch(`http://127.0.0.1:${port}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    assert.strictEqual(response.status, 400, 'upload sem arquivo deve falhar');
+    assert.deepStrictEqual(await response.json(), { message: 'Arquivo obrigatório.' });
+  } finally {
+    await stopServer(server);
+  }
+});
+
+test('deve retornar 404 ao baixar documento inexistente', async () => {
+  const { server, port } = await startServer();
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/documents/id-inexistente/download`);
+
+    assert.strictEqual(response.status, 404, 'documento inexistente deve retornar 404');
+    assert.deepStrictEqual(await response.json(), { message: 'Documento não encontrado.' });
+  } finally {
+    await stopServer(server);
+  }
+});
